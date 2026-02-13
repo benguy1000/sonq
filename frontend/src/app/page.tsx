@@ -32,7 +32,7 @@ export default function Home() {
   const { startQuiz, quizId } = useQuizStore();
 
   const [prompt, setPrompt] = useState("");
-  const [songCount, setSongCount] = useState("50");
+  const [songCount, setSongCount] = useState("20");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -267,14 +267,14 @@ export default function Home() {
                   const p = randomPrompt();
                   setPrompt(p);
                   setDifficulty("medium");
-                  setSongCount("50");
+                  setSongCount("20");
                   setLoading(true);
                   setError(null);
                   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
                   fetch(`${apiUrl}/api/generate-quiz`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ prompt: p, songCount: 50 }),
+                    body: JSON.stringify({ prompt: p, songCount: 20 }),
                   })
                     .then(async (res) => {
                       if (!res.ok) {
