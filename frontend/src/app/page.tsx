@@ -65,32 +65,49 @@ export default function Home() {
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden">
-      {/* Background gradient blobs */}
-      <div className="fixed inset-0 -z-10">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-pink-500/15 blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-orange-500/15 blur-[120px]" />
-        <div className="absolute top-[40%] right-[20%] w-[300px] h-[300px] rounded-full bg-emerald-500/10 blur-[100px]" />
+      {/* Animated background blobs */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div
+          className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-pink-500/30 blur-[100px]"
+          style={{ animation: "blob1 10s ease-in-out infinite" }}
+        />
+        <div
+          className="absolute bottom-[-15%] right-[-5%] w-[550px] h-[550px] rounded-full bg-orange-500/25 blur-[120px]"
+          style={{ animation: "blob2 12s ease-in-out infinite" }}
+        />
+        <div
+          className="absolute top-[30%] right-[10%] w-[400px] h-[400px] rounded-full bg-emerald-500/20 blur-[100px]"
+          style={{ animation: "blob3 14s ease-in-out infinite" }}
+        />
+        <div
+          className="absolute top-[60%] left-[15%] w-[350px] h-[350px] rounded-full bg-fuchsia-500/20 blur-[110px]"
+          style={{ animation: "blob4 9s ease-in-out infinite" }}
+        />
+        <div
+          className="absolute top-[10%] right-[30%] w-[300px] h-[300px] rounded-full bg-amber-400/20 blur-[90px]"
+          style={{ animation: "blob5 11s ease-in-out infinite" }}
+        />
       </div>
 
       <div className="w-full max-w-lg space-y-8">
         {/* Logo/Title */}
         <div className="text-center space-y-3">
           <div
-            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-3"
+            className="inline-flex items-center justify-center w-28 h-28 rounded-3xl mb-4"
             style={{
               background: "linear-gradient(135deg, hsl(330 85% 60%), hsl(24 90% 55%))",
               animation: "float 3s ease-in-out infinite",
             }}
           >
-            <Music className="h-10 w-10 text-white" />
+            <Music className="h-14 w-14 text-white" />
           </div>
-          <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight">
+          <h1 className="text-6xl sm:text-8xl font-extrabold tracking-tight">
             Son
             <span className="bg-gradient-to-r from-pink-500 via-orange-400 to-emerald-400 bg-clip-text text-transparent">
               Q
             </span>
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-xl sm:text-2xl">
             AI Song Quiz Creator
           </p>
         </div>

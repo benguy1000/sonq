@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { useQuizStore } from "@/lib/quizStore";
-import { checkAnswer } from "@/lib/fuzzyMatch";
+import { checkAnswer, stripSuffix } from "@/lib/fuzzyMatch";
 import { cn } from "@/lib/utils";
 
 interface SongInputProps {
@@ -25,6 +25,7 @@ export default function SongInput({ index }: SongInputProps) {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const song = songs[index];
+  const displayTitle = stripSuffix(song.title);
   const isCorrect = correctAnswers[index];
   const isCurrent = currentSongIndex === index;
   const answer = userAnswers[index] || "";
@@ -92,11 +93,11 @@ export default function SongInput({ index }: SongInputProps) {
         {/* Input or revealed answer */}
         {isCorrect ? (
           <div className="text-green-400 font-medium text-sm truncate">
-            {song.title}
+            {displayTitle}
           </div>
         ) : revealed ? (
           <div className="text-red-400 font-medium text-sm truncate">
-            {song.title}
+            {displayTitle}
           </div>
         ) : (
           <input

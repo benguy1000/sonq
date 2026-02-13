@@ -1,30 +1,44 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { useQuizStore } from "@/lib/quizStore";
-import { Flag, RotateCcw } from "lucide-react";
+import { Flag, RotateCcw, Clock } from "lucide-react";
 
 export default function QuizControls() {
   const { songs, score, revealed, startedAt, revealAll, resetQuiz } =
     useQuizStore();
-  const [elapsed, setElapsed] = useState(0);
+
+  const totalSeconds = songs.length * 30;
+  const [remaining, setRemaining] = useState(totalSeconds);
+
+  const handleTimeUp = useCallback(() => {
+    revealAll();
+  }, [revealAll]);
 
   useEffect(() => {
     if (!startedAt || revealed) return;
 
     const interval = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - startedAt) / 1000));
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      const left = Math.max(0, totalSeconds - elapsed);
+      setRemaining(left);
+
+      if (left === 0) {
+        handleTimeUp();
+      }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [startedAt, revealed]);
+  }, [startedAt, revealed, totalSeconds, handleTimeUp]);
 
-  const formatElapsed = () => {
-    const m = Math.floor(elapsed / 60);
-    const s = elapsed % 60;
+  const formatTime = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
+
+  const urgency = remaining <= 30 ? "text-red-400" : remaining <= 60 ? "text-orange-400" : "text-zinc-300";
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 bg-zinc-900 rounded-xl p-4 border border-zinc-800">
@@ -41,11 +55,12 @@ export default function QuizControls() {
 
       {/* Timer */}
       <div className="text-center">
-        <div className="text-2xl font-mono text-zinc-300">
-          {formatElapsed()}
+        <div className={`text-2xl font-mono ${urgency} ${remaining <= 30 && !revealed ? "animate-pulse" : ""}`}>
+          <Clock className="inline h-4 w-4 mr-1 mb-0.5" />
+          {revealed ? formatTime(totalSeconds - remaining) : formatTime(remaining)}
         </div>
         <div className="text-xs text-zinc-500 uppercase tracking-wider">
-          Time
+          {revealed ? "Final Time" : "Remaining"}
         </div>
       </div>
 

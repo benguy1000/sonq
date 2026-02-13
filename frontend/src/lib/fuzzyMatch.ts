@@ -1,7 +1,7 @@
 import Fuse from "fuse.js";
 import { Difficulty } from "./types";
 
-function stripSuffix(text: string): string {
+export function stripSuffix(text: string): string {
   // Remove " - Remastered 2011", " (Remastered)", " - Live", " (Deluxe Edition)", etc.
   return text
     .replace(/\s*[-–]\s*(remaster(ed)?|re-?master(ed)?|live|mono|stereo|bonus track|deluxe|anniversary|edition).*$/i, "")
@@ -43,12 +43,12 @@ export function checkAnswer(
   if (input.includes(title)) return true;
 
   // Check if the title contains the input (only if input is substantial)
-  const containsRatio = difficulty === "easy" ? 0.7 : 0.85;
+  const containsRatio = difficulty === "easy" ? 0.8 : 0.9;
   if (title.includes(input) && input.length >= 4 && input.length / title.length >= containsRatio) return true;
 
   // Fuse.js fuzzy search
-  const fuseThreshold = difficulty === "easy" ? 0.4 : 0.25;
-  const scoreThreshold = difficulty === "easy" ? 0.4 : 0.25;
+  const fuseThreshold = difficulty === "easy" ? 0.3 : 0.2;
+  const scoreThreshold = difficulty === "easy" ? 0.3 : 0.2;
 
   const fuse = new Fuse([{ title, normalized: title }], {
     keys: ["title", "normalized"],
