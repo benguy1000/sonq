@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,15 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
 
   const hasExistingQuiz = quizId !== null;
+  const blobRef = useRef<HTMLDivElement>(null);
+
+  const pokeBlobs = useCallback(() => {
+    const el = blobRef.current;
+    if (!el) return;
+    el.classList.remove("blob-poked");
+    void el.offsetWidth;
+    el.classList.add("blob-poked");
+  }, []);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -64,9 +73,9 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+    <main className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden" onClick={pokeBlobs}>
       {/* Animated background blobs */}
-      <div className="fixed inset-0 -z-10 overflow-hidden">
+      <div ref={blobRef} className="fixed inset-0 -z-10 overflow-hidden">
         <div
           className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-pink-500/30 blur-[100px]"
           style={{ animation: "blob1 10s ease-in-out infinite" }}
@@ -247,6 +256,11 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      <p className="absolute bottom-4 text-zinc-600 text-xs">
+        Built by{" "}
+        <a href="https://github.com/benguy1000" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-zinc-300 transition-colors">Ben</a>
+      </p>
     </main>
   );
 }

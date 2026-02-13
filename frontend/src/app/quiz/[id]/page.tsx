@@ -87,9 +87,14 @@ export default function QuizPage() {
       <AnswerGrid />
 
       {/* Keyboard shortcuts hint */}
-      <div className="text-center text-xs text-zinc-600 pb-4">
+      <div className="text-center text-xs text-zinc-600 pb-1">
         Click any tile to jump to that song. Type your answer and press Enter.
       </div>
+
+      <p className="text-center text-zinc-600 text-xs pb-4">
+        Built by{" "}
+        <a href="https://github.com/benguy1000" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-zinc-300 transition-colors">Ben</a>
+      </p>
     </main>
   );
 }
