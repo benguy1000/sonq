@@ -2,17 +2,5 @@
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/.next",
   "devCommand": "cd frontend && npm run dev",
-  "installCommand": "cd frontend && npm install && cd ../backend && pip install -r requirements.txt",
-  "functions": {
-    "backend/api/**/*.py": {
-      "runtime": "@vercel/python@4.5.0",
-      "maxDuration": 60
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ]
+  "installCommand": "cd frontend && npm install"
 }
