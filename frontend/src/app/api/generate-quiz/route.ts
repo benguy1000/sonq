@@ -74,18 +74,32 @@ async function validateSongs(
   return valid;
 }
 
+// ── Difficulty Ratios ─────────────────────────────────────────────
+
+const difficultyRatios: Record<string, { hits: number; solid: number; deep: number }> = {
+  easy:   { hits: 70, solid: 20, deep: 10 },
+  medium: { hits: 50, solid: 35, deep: 15 },
+  hard:   { hits: 25, solid: 50, deep: 25 },
+};
+
 // ── LLM Song Generation ───────────────────────────────────────────
 
-async function generateSongList(prompt: string, count: number): Promise<SongSuggestion[]> {
+async function generateSongList(prompt: string, count: number, difficulty: string): Promise<SongSuggestion[]> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error("OPENAI_API_KEY must be set");
 
   const client = new OpenAI({ apiKey });
 
+  const ratios = difficultyRatios[difficulty] || difficultyRatios.medium;
+
   const systemPrompt =
-    "You are a music expert. Generate a list of well-known songs that match the given genre/era description. " +
+    "You are a music expert creating a song quiz. Generate a list of songs that match the given genre/era description. " +
     "Return ONLY a JSON array of objects with 'title' and 'artist' keys. " +
-    "Focus on popular, recognizable songs. " +
+    "IMPORTANT: Create a difficulty mix with these ratios:\n" +
+    `- ~${ratios.hits}% should be iconic hits that most people would recognize instantly\n` +
+    `- ~${ratios.solid}% should be solid album tracks, fan favorites, or moderate hits — songs that dedicated listeners would know\n` +
+    `- ~${ratios.deep}% should be deep cuts, B-sides, or lesser-known gems from notable artists in the genre\n` +
+    "Shuffle the difficulty levels throughout the list — do NOT group them by difficulty. " +
     "Include a diverse mix of artists. Do not repeat artists more than twice. " +
     "Return exactly the requested number of songs.";
 
@@ -143,6 +157,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const prompt = String(body.prompt || "").trim();
     const songCount = Math.min(50, Math.max(10, Number(body.songCount) || 50));
+    const difficulty = ["easy", "medium", "hard"].includes(body.difficulty) ? body.difficulty : "medium";
 
     if (!prompt || prompt.length < 2) {
       return NextResponse.json({ detail: "Prompt must be at least 2 characters" }, { status: 400 });
@@ -163,7 +178,8 @@ export async function POST(request: NextRequest) {
 
       console.log(`Round ${round + 1}: Generating ${generateCount} songs (have ${allValidSongs.length}/${targetCount})`);
 
-      const suggestions = await generateSongList(prompt, generateCount);
+      console.log(`Using difficulty "${difficulty}" — ratios: ${JSON.stringify(difficultyRatios[difficulty] || difficultyRatios.medium)}`);
+      const suggestions = await generateSongList(prompt, generateCount, difficulty);
       const valid = await validateSongs(suggestions, needed);
 
       for (const song of valid) {

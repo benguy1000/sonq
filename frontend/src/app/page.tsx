@@ -22,9 +22,9 @@ function randomPrompt(): string {
 }
 
 const difficulties: { value: Difficulty; label: string; desc: string }[] = [
-  { value: "easy", label: "Easy", desc: "Fuzzy matching, close enough counts" },
-  { value: "medium", label: "Medium", desc: "Minor typos allowed" },
-  { value: "hard", label: "Hard", desc: "Exact title required" },
+  { value: "easy", label: "Easy", desc: "Fuzzy matching + mostly well-known hits" },
+  { value: "medium", label: "Medium", desc: "Minor typos allowed + balanced song mix" },
+  { value: "hard", label: "Hard", desc: "Exact title + more deep cuts and B-sides" },
 ];
 
 export default function Home() {
@@ -78,7 +78,7 @@ export default function Home() {
       const res = await fetch(`${apiUrl}/api/generate-quiz`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: prompt.trim(), songCount: clampedCount }),
+        body: JSON.stringify({ prompt: prompt.trim(), songCount: clampedCount, difficulty }),
       });
 
       if (!res.ok) {
@@ -274,7 +274,7 @@ export default function Home() {
                   fetch(`${apiUrl}/api/generate-quiz`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ prompt: p, songCount: 20 }),
+                    body: JSON.stringify({ prompt: p, songCount: 20, difficulty: "medium" }),
                   })
                     .then(async (res) => {
                       if (!res.ok) {
@@ -354,7 +354,7 @@ export default function Home() {
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center text-xs font-bold">1</span>
                 <div>
                   <span>Enter a prompt for what genre and era of songs you would like in your quiz, example: &quot;90s alternative rock&quot;, &quot;2000s pop punk&quot;, &quot;80s new wave&quot;</span>
-                  <p className="text-xs text-zinc-500 mt-1">Difficulty controls how strict the matching is. Easy accepts close guesses, Hard needs the exact title.</p>
+                  <p className="text-xs text-zinc-500 mt-1">Difficulty affects both answer matching and song selection. Easy = more hits with forgiving matching. Hard = more deep cuts with exact titles required.</p>
                 </div>
               </li>
               <li className="flex gap-3">
