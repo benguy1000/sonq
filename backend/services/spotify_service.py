@@ -1,4 +1,5 @@
 import os
+import re
 import asyncio
 import logging
 import httpx
@@ -44,6 +45,28 @@ async def get_access_token() -> str:
         return _token
 
 
+async def get_preview_from_embed(track_id: str) -> Optional[str]:
+    """Fetch preview URL from Spotify's embed page (fallback when API returns None)."""
+    try:
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
+            resp = await client.get(
+                f"https://open.spotify.com/embed/track/{track_id}",
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
+            )
+            if resp.status_code == 200:
+                match = re.search(r'"audioPreview":\{"url":"([^"]+)"', resp.text)
+                if match:
+                    logger.info(f"Got embed preview for {track_id}")
+                    return match.group(1)
+                else:
+                    logger.warning(f"No audioPreview in embed page for {track_id}")
+            else:
+                logger.warning(f"Embed page returned {resp.status_code} for {track_id}")
+    except Exception as e:
+        logger.warning(f"Embed preview fetch failed for {track_id}: {e}")
+    return None
+
+
 async def search_track(
     title: str, artist: str, token: str, semaphore: asyncio.Semaphore
 ) -> Optional[Dict[str, Any]]:
@@ -53,7 +76,7 @@ async def search_track(
     async with semaphore:
         for attempt in range(3):
             try:
-                async with httpx.AsyncClient(timeout=2.0) as client:
+                async with httpx.AsyncClient(timeout=5.0) as client:
                     resp = await client.get(
                         "https://api.spotify.com/v1/search",
                         headers={"Authorization": f"Bearer {token}"},
@@ -74,7 +97,13 @@ async def search_track(
                         return None
 
                     track = tracks[0]
+                    track_id = track["id"]
+
+                    # Try API preview URL first, fall back to embed page
                     preview_url = track.get("preview_url")
+                    if not preview_url:
+                        preview_url = await get_preview_from_embed(track_id)
+
                     if not preview_url:
                         return None
 
@@ -86,7 +115,7 @@ async def search_track(
                         "artist": ", ".join(a["name"] for a in track.get("artists", [])),
                         "album_art": album_art,
                         "preview_url": preview_url,
-                        "spotify_id": track["id"],
+                        "spotify_id": track_id,
                     }
 
             except httpx.TimeoutException:
