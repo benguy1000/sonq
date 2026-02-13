@@ -9,7 +9,7 @@ export default function QuizControls() {
   const { songs, score, revealed, startedAt, revealAll, resetQuiz } =
     useQuizStore();
 
-  const totalSeconds = songs.length * 30;
+  const totalSeconds = songs.length * 20;
   const [remaining, setRemaining] = useState(totalSeconds);
 
   const handleTimeUp = useCallback(() => {

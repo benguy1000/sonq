@@ -27,7 +27,8 @@ export default function Home() {
   const hasExistingQuiz = quizId !== null;
   const blobRef = useRef<HTMLDivElement>(null);
 
-  const pokeBlobs = useCallback(() => {
+  const pokeBlobs = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest("button, input, a, [role='button']")) return;
     const el = blobRef.current;
     if (!el) return;
     el.classList.remove("blob-poked");
