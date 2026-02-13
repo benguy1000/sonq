@@ -37,3 +37,7 @@ npm-debug.log*
 
 # Claude Code
 .claude/
+
+# Misc
+prompt.txt
+nul
