@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
+// Allow up to 60s on Vercel (default is 10s)
+export const maxDuration = 60;
+
 // ── Types ──────────────────────────────────────────────────────────
 
 interface SongSuggestion {
@@ -100,10 +103,7 @@ async function searchTrack(
       const track = tracks[0];
       const trackId = track.id;
 
-      let previewUrl = track.preview_url;
-      if (!previewUrl) {
-        previewUrl = await getPreviewFromEmbed(trackId);
-      }
+      const previewUrl = track.preview_url || await getPreviewFromEmbed(trackId);
       if (!previewUrl) return null;
 
       const albumImages = track.album?.images || [];
@@ -126,7 +126,7 @@ async function validateSongs(
   targetCount: number
 ): Promise<SpotifyTrack[]> {
   const token = await getSpotifyToken();
-  const concurrency = 10;
+  const concurrency = 20;
   const results: SpotifyTrack[] = [];
 
   // Process in batches to limit concurrency
