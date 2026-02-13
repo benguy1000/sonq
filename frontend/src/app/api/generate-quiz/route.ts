@@ -114,8 +114,20 @@ async function generateSongList(prompt: string, count: number): Promise<SongSugg
     text = lines.join("\n");
   }
 
-  const songs: unknown[] = JSON.parse(text);
-  if (!Array.isArray(songs)) throw new Error("LLM did not return a JSON array");
+  // Try to extract a JSON array even if the LLM added surrounding text
+  let songs: unknown[];
+  try {
+    const parsed = JSON.parse(text);
+    songs = Array.isArray(parsed) ? parsed : [];
+  } catch {
+    const match = text.match(/\[[\s\S]*\]/);
+    if (match) {
+      songs = JSON.parse(match[0]);
+    } else {
+      throw new Error("LLM did not return valid JSON");
+    }
+  }
+  if (!Array.isArray(songs) || songs.length === 0) throw new Error("LLM did not return a JSON array");
 
   return songs
     .filter((s): s is { title: string; artist: string } =>
