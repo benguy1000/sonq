@@ -7,9 +7,12 @@ export interface Song {
   track_number: number;
 }
 
+export type Difficulty = "easy" | "medium" | "hard";
+
 export interface QuizState {
   quizId: string | null;
   prompt: string;
+  difficulty: Difficulty;
   songs: Song[];
   currentSongIndex: number;
   userAnswers: string[];

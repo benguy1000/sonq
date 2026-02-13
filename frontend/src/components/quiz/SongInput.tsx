@@ -16,6 +16,7 @@ export default function SongInput({ index }: SongInputProps) {
     userAnswers,
     correctAnswers,
     revealed,
+    difficulty,
     setCurrentSong,
     setUserAnswer,
     markCorrect,
@@ -37,19 +38,12 @@ export default function SongInput({ index }: SongInputProps) {
 
   const handleChange = (value: string) => {
     setUserAnswer(index, value);
-    // Check on every keystroke for instant feedback
-    if (value.length >= 3 && !isCorrect) {
-      const matched = checkAnswer(value, song.title, song.artist);
-      if (matched) {
-        markCorrect(index);
-      }
-    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       if (!isCorrect && answer.length >= 2) {
-        const matched = checkAnswer(answer, song.title, song.artist);
+        const matched = checkAnswer(answer, song.title, song.artist, difficulty);
         if (matched) markCorrect(index);
       }
       // Move to next unanswered

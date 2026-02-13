@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import { Song, QuizState } from "./types";
 
 interface QuizActions {
-  startQuiz: (quizId: string, prompt: string, songs: Song[]) => void;
+  startQuiz: (quizId: string, prompt: string, songs: Song[], difficulty: import("./types").Difficulty) => void;
   setCurrentSong: (index: number) => void;
   setUserAnswer: (index: number, answer: string) => void;
   markCorrect: (index: number) => void;
@@ -18,6 +18,7 @@ interface QuizActions {
 const initialState: QuizState = {
   quizId: null,
   prompt: "",
+  difficulty: "medium",
   songs: [],
   currentSongIndex: 0,
   userAnswers: [],
@@ -36,10 +37,11 @@ export const useQuizStore = create<QuizState & QuizActions>()(
     (set, get) => ({
       ...initialState,
 
-      startQuiz: (quizId, prompt, songs) =>
+      startQuiz: (quizId, prompt, songs, difficulty) =>
         set({
           quizId,
           prompt,
+          difficulty,
           songs,
           currentSongIndex: 0,
           userAnswers: new Array(songs.length).fill(""),
@@ -85,6 +87,7 @@ export const useQuizStore = create<QuizState & QuizActions>()(
       partialize: (state) => ({
         quizId: state.quizId,
         prompt: state.prompt,
+        difficulty: state.difficulty,
         songs: state.songs,
         currentSongIndex: state.currentSongIndex,
         userAnswers: state.userAnswers,
