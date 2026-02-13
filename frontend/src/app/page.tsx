@@ -6,7 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuizStore } from "@/lib/quizStore";
 import { Difficulty } from "@/lib/types";
-import { Music, Loader2, Sparkles, HelpCircle, X, Share2 } from "lucide-react";
+import { Music, Loader2, Sparkles, HelpCircle, X, Share2, Shuffle } from "lucide-react";
+
+const decades = ["1950s", "1960s", "1970s", "1980s", "1990s", "2000s", "2010s", "2020s"];
+const genres = [
+  "rock", "pop", "R&B", "hip hop", "country", "jazz", "reggae", "disco",
+  "punk", "metal", "soul", "funk", "blues", "electronic", "folk",
+  "alternative", "latin", "gospel", "classical crossover", "new wave",
+];
+
+function randomPrompt(): string {
+  const decade = decades[Math.floor(Math.random() * decades.length)];
+  const genre = genres[Math.floor(Math.random() * genres.length)];
+  return `${decade} ${genre}`;
+}
 
 const difficulties: { value: Difficulty; label: string; desc: string }[] = [
   { value: "easy", label: "Easy", desc: "Fuzzy matching, close enough counts" },
@@ -234,20 +247,57 @@ export default function Home() {
               </p>
             </div>
 
-            <Button
-              onClick={handleGenerate}
-              disabled={!prompt.trim()}
-              className="w-full h-12 text-base font-semibold text-white border-0 disabled:opacity-40"
-              style={{
-                background: prompt.trim()
-                  ? "linear-gradient(135deg, hsl(330 85% 55%), hsl(24 90% 50%))"
-                  : undefined,
-              }}
-              size="lg"
-            >
-              <Sparkles className="mr-2 h-5 w-5" />
-              Generate Quiz
-            </Button>
+            <div className="space-y-2">
+              <Button
+                onClick={handleGenerate}
+                disabled={!prompt.trim()}
+                className="w-full h-12 text-base font-semibold text-white border-0 disabled:opacity-40"
+                style={{
+                  background: prompt.trim()
+                    ? "linear-gradient(135deg, hsl(330 85% 55%), hsl(24 90% 50%))"
+                    : undefined,
+                }}
+                size="lg"
+              >
+                <Sparkles className="mr-2 h-5 w-5" />
+                Generate Quiz
+              </Button>
+              <button
+                onClick={() => {
+                  const p = randomPrompt();
+                  setPrompt(p);
+                  setDifficulty("medium");
+                  setSongCount("50");
+                  setLoading(true);
+                  setError(null);
+                  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+                  fetch(`${apiUrl}/api/generate-quiz`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt: p, songCount: 50 }),
+                  })
+                    .then(async (res) => {
+                      if (!res.ok) {
+                        const err = await res.json().catch(() => ({ detail: "Unknown error" }));
+                        throw new Error(err.detail || `Server error: ${res.status}`);
+                      }
+                      return res.json();
+                    })
+                    .then((data) => {
+                      startQuiz(data.quiz_id, data.prompt, data.songs, "medium");
+                      router.push(`/quiz/${data.quiz_id}`);
+                    })
+                    .catch((err) => {
+                      setError(err instanceof Error ? err.message : "Failed to generate quiz.");
+                      setLoading(false);
+                    });
+                }}
+                className="w-full h-10 rounded-xl text-sm font-semibold border border-white/10 text-zinc-400 hover:text-white hover:border-white/20 transition-colors flex items-center justify-center gap-2"
+              >
+                <Shuffle className="h-4 w-4" />
+                I&apos;m Feeling Lucky
+              </button>
+            </div>
           </div>
         )}
 
@@ -302,7 +352,10 @@ export default function Home() {
             <ol className="space-y-3 text-sm text-zinc-300">
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center text-xs font-bold">1</span>
-                <span>Pick a genre or era and choose how many songs you want</span>
+                <div>
+                  <span>Enter a prompt for what genre and era of songs you would like in your quiz, example: &quot;90s alternative rock&quot;, &quot;2000s pop punk&quot;, &quot;80s new wave&quot;</span>
+                  <p className="text-xs text-zinc-500 mt-1">Difficulty controls how strict the matching is. Easy accepts close guesses, Hard needs the exact title.</p>
+                </div>
               </li>
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold">2</span>
@@ -317,14 +370,6 @@ export default function Home() {
                 <span>Click any tile to jump to that song and beat the clock!</span>
               </li>
             </ol>
-            <div className="space-y-1">
-              <p className="text-xs text-zinc-500">
-                Difficulty controls how strict the matching is. Easy accepts close guesses, Hard needs the exact title.
-              </p>
-              <p className="text-xs text-zinc-500">
-                Try prompts like &quot;90s alternative rock&quot;, &quot;2000s pop punk&quot;, &quot;80s new wave&quot;, &quot;disco classics&quot;, or &quot;best of the Beatles&quot;.
-              </p>
-            </div>
             <button
               onClick={() => {
                 navigator.clipboard.writeText(window.location.origin);
