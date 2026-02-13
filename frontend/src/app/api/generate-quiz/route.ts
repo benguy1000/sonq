@@ -54,71 +54,75 @@ async function getSpotifyToken(): Promise<string> {
 
 // ── Spotify Search ─────────────────────────────────────────────────
 
+function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: number): Promise<Response> {
+  return Promise.race([
+    fetch(url, options),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("timeout")), timeoutMs)
+    ),
+  ]);
+}
+
 async function getPreviewFromEmbed(trackId: string): Promise<string | null> {
   try {
-    const resp = await fetch(`https://open.spotify.com/embed/track/${trackId}`, {
-      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
-    });
+    const resp = await fetchWithTimeout(
+      `https://open.spotify.com/embed/track/${trackId}`,
+      { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" } },
+      3000 // 3s timeout per embed scrape
+    );
     if (resp.ok) {
       const html = await resp.text();
       const match = html.match(/"audioPreview":\{"url":"([^"]+)"/);
       if (match) return match[1];
     }
   } catch {
-    // ignore
+    // timeout or fetch error — skip this track
   }
   return null;
 }
 
-async function searchTrack(
+interface SpotifySearchResult {
+  trackName: string;
+  artistName: string;
+  albumArt: string;
+  trackId: string;
+  previewUrl: string | null;
+}
+
+async function searchSpotifyApi(
   title: string,
   artist: string,
   token: string
-): Promise<SpotifyTrack | null> {
+): Promise<SpotifySearchResult | null> {
   const query = `track:${title} artist:${artist}`;
+  try {
+    const resp = await fetchWithTimeout(
+      `https://api.spotify.com/v1/search?${new URLSearchParams({
+        q: query,
+        type: "track",
+        limit: "1",
+        market: "US",
+      })}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+      5000
+    );
 
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const resp = await fetch(
-        `https://api.spotify.com/v1/search?${new URLSearchParams({
-          q: query,
-          type: "track",
-          limit: "1",
-          market: "US",
-        })}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    const track = data?.tracks?.items?.[0];
+    if (!track) return null;
 
-      if (resp.status === 429) {
-        const retryAfter = parseInt(resp.headers.get("Retry-After") || "1");
-        await new Promise((r) => setTimeout(r, retryAfter * 1000 * (2 ** attempt)));
-        continue;
-      }
-
-      if (!resp.ok) return null;
-      const data = await resp.json();
-      const tracks = data?.tracks?.items;
-      if (!tracks?.length) return null;
-
-      const track = tracks[0];
-      const trackId = track.id;
-
-      const previewUrl = track.preview_url || await getPreviewFromEmbed(trackId);
-      if (!previewUrl) return null;
-
-      const albumImages = track.album?.images || [];
-      return {
-        title: track.name,
-        artist: track.artists?.map((a: { name: string }) => a.name).join(", ") || "",
-        album_art: albumImages[0]?.url || "",
-        preview_url: previewUrl,
-        spotify_id: trackId,
-      };
-    } catch {
-      if (attempt < 2) await new Promise((r) => setTimeout(r, 500 * (2 ** attempt)));
-    }
+    const albumImages = track.album?.images || [];
+    return {
+      trackName: track.name,
+      artistName: track.artists?.map((a: { name: string }) => a.name).join(", ") || "",
+      albumArt: albumImages[0]?.url || "",
+      trackId: track.id,
+      previewUrl: track.preview_url || null,
+    };
+  } catch {
+    return null;
   }
-  return null;
 }
 
 async function validateSongs(
@@ -126,24 +130,63 @@ async function validateSongs(
   targetCount: number
 ): Promise<SpotifyTrack[]> {
   const token = await getSpotifyToken();
-  const concurrency = 20;
-  const results: SpotifyTrack[] = [];
 
-  // Process in batches to limit concurrency
-  for (let i = 0; i < suggestions.length; i += concurrency) {
-    if (results.length >= targetCount) break;
-    const batch = suggestions.slice(i, i + concurrency);
-    const batchResults = await Promise.all(
-      batch.map((s) => searchTrack(s.title, s.artist, token))
-    );
-    for (const r of batchResults) {
-      if (r) {
-        results.push(r);
-        if (results.length >= targetCount) break;
-      }
+  // Phase 1: Search all songs on Spotify API in parallel (fast — just metadata)
+  console.log(`Searching ${suggestions.length} songs on Spotify API...`);
+  const searchResults = await Promise.all(
+    suggestions.map((s) => searchSpotifyApi(s.title, s.artist, token))
+  );
+
+  // Split into: have preview vs need embed scrape
+  const ready: SpotifyTrack[] = [];
+  const needEmbed: SpotifySearchResult[] = [];
+
+  for (const r of searchResults) {
+    if (!r) continue;
+    if (r.previewUrl) {
+      ready.push({
+        title: r.trackName,
+        artist: r.artistName,
+        album_art: r.albumArt,
+        preview_url: r.previewUrl,
+        spotify_id: r.trackId,
+      });
+    } else {
+      needEmbed.push(r);
     }
   }
-  return results;
+
+  console.log(`Found ${ready.length} with native preview, ${needEmbed.length} need embed scrape`);
+
+  // If we already have enough, skip embed scraping entirely
+  if (ready.length >= targetCount) {
+    return ready.slice(0, targetCount);
+  }
+
+  // Phase 2: Scrape embeds only for as many as we need, all in parallel with timeouts
+  const stillNeeded = targetCount - ready.length;
+  const toScrape = needEmbed.slice(0, stillNeeded + 5); // scrape a few extra in case some fail
+
+  console.log(`Scraping ${toScrape.length} embed pages...`);
+  const embedResults = await Promise.all(
+    toScrape.map(async (r) => {
+      const previewUrl = await getPreviewFromEmbed(r.trackId);
+      if (!previewUrl) return null;
+      return {
+        title: r.trackName,
+        artist: r.artistName,
+        album_art: r.albumArt,
+        preview_url: previewUrl,
+        spotify_id: r.trackId,
+      } as SpotifyTrack;
+    })
+  );
+
+  for (const r of embedResults) {
+    if (r) ready.push(r);
+  }
+
+  return ready.slice(0, targetCount);
 }
 
 // ── LLM Song Generation ───────────────────────────────────────────
@@ -211,16 +254,16 @@ export async function POST(request: NextRequest) {
     const targetCount = songCount;
     const allValidSongs: SpotifyTrack[] = [];
     const seenIds = new Set<string>();
-    const maxRounds = 3;
+    const maxRounds = 2;
 
     for (let round = 0; round < maxRounds; round++) {
       const needed = targetCount - allValidSongs.length;
       if (needed <= 0) break;
 
-      const generateCount = Math.max(
-        20,
-        round === 0 ? Math.ceil(needed * 1.6) : needed * 2
-      );
+      // Generate more candidates than needed to account for missing previews
+      const generateCount = round === 0
+        ? Math.ceil(needed * 2.5)  // ask for 2.5x on first round
+        : needed * 3;
 
       console.log(`Round ${round + 1}: Generating ${generateCount} songs (have ${allValidSongs.length}/${targetCount})`);
 
