@@ -3,7 +3,7 @@ export interface Song {
   artist: string;
   album_art: string;
   preview_url: string;
-  spotify_id: string;
+  track_id: string;
   track_number: number;
 }
 
