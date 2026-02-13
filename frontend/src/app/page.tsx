@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuizStore } from "@/lib/quizStore";
 import { Difficulty } from "@/lib/types";
-import { Music, Loader2, Sparkles } from "lucide-react";
+import { Music, Loader2, Sparkles, HelpCircle, X } from "lucide-react";
 
 const difficulties: { value: Difficulty; label: string; desc: string }[] = [
   { value: "easy", label: "Easy", desc: "Fuzzy matching, close enough counts" },
@@ -23,6 +23,7 @@ export default function Home() {
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   const hasExistingQuiz = quizId !== null;
   const blobRef = useRef<HTMLDivElement>(null);
@@ -133,6 +134,13 @@ export default function Home() {
           <p className="text-muted-foreground text-xl sm:text-2xl">
             AI Song Quiz Creator
           </p>
+          <button
+            onClick={() => setShowHelp(true)}
+            className="inline-flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 text-sm transition-colors mt-1"
+          >
+            <HelpCircle className="h-4 w-4" />
+            How to Play
+          </button>
         </div>
 
         {/* Form or Loading */}
@@ -275,6 +283,45 @@ export default function Home() {
         Built by{" "}
         <a href="https://github.com/benguy1000" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-zinc-300 transition-colors">Ben</a>
       </p>
+
+      {/* How to Play modal */}
+      {showHelp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowHelp(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="relative bg-zinc-900 border border-zinc-700 rounded-2xl p-6 max-w-sm w-full space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-white">How to Play</h2>
+              <button onClick={() => setShowHelp(false)} className="text-zinc-500 hover:text-white transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <ol className="space-y-3 text-sm text-zinc-300">
+              <li className="flex gap-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center text-xs font-bold">1</span>
+                <span>Pick a genre or era and choose how many songs you want</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold">2</span>
+                <span>Listen to the 30-second audio preview for each song</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">3</span>
+                <span>Type the song title and press Enter to check your answer</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold">4</span>
+                <span>Click any tile to jump to that song — beat the clock!</span>
+              </li>
+            </ol>
+            <p className="text-xs text-zinc-500">
+              Tip: Difficulty controls how strict the matching is. Easy accepts close guesses, Hard needs the exact title.
+            </p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
