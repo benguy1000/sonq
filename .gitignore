@@ -39,5 +39,4 @@ npm-debug.log*
 .claude/
 
 # Misc
-prompt.txt
 nul
