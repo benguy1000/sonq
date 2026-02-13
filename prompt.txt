@@ -1,0 +1,339 @@
+PROJECT PROMPT: Sporcle-Style Music Quiz App (MVP)
+
+========================================
+PROJECT OVERVIEW
+========================================
+
+Build a Sporcle-style music quiz app where users enter a music genre/era prompt (e.g., "90s alt rock") and get an interactive quiz with song clips they need to identify. The app should use Spotify's 30-second preview clips and fuzzy matching for answers.
+
+========================================
+TECH STACK
+========================================
+
+Frontend: Next.js 14 (App Router), TypeScript, Tailwind CSS, shadcn/ui
+Backend: Python FastAPI (deployed as Vercel serverless functions)
+APIs: Spotify Web API, OpenAI/Anthropic for song curation
+Deployment: Vercel
+Matching: rapidfuzz (backend) + fuse.js (frontend)
+
+========================================
+CORE FEATURES TO IMPLEMENT
+========================================
+
+1. BACKEND API (/api directory or separate FastAPI)
+---------------------------------------------------
+
+Create a FastAPI endpoint /api/generate-quiz that:
+
+- Accepts POST request with { "prompt": "90s alt rock", "songCount": 50 }
+- Uses LLM (OpenAI or Anthropic) to generate a curated list of 70-80 songs (40% buffer) with structured JSON output: [{"title": "Song Name", "artist": "Artist Name"}, ...]
+- Validates EACH song exists on Spotify and has a preview URL available
+- Continues validating songs until 50 valid songs with previews are found
+- If unable to find 50 songs with previews after checking all generated songs, generate more songs and continue until 50 are found
+- Queries Spotify Web API in parallel (using asyncio.gather) for each song to get:
+  * Track name
+  * Artist name
+  * Album art URL
+  * Preview URL (30-second MP3 clip)
+  * Spotify track ID
+- Returns JSON array of exactly 50 songs with all metadata and valid preview URLs
+- Implements retry with exponential backoff for Spotify API rate limiting (429 errors)
+- Add simple in-memory caching layer (dict) to avoid re-generating identical prompts
+- Set timeout on individual Spotify API calls (2s per request)
+- Implements comprehensive error handling
+
+Key libraries needed in requirements.txt:
+fastapi
+spotipy
+openai  # or anthropic
+rapidfuzz
+uvicorn
+httpx
+
+2. FRONTEND QUIZ INTERFACE
+---------------------------
+
+Build a Sporcle-style quiz page with:
+
+AUDIO PLAYER COMPONENT:
+- Displays current song number (e.g., "Song 1 of 50")
+- Play/Pause button
+- Skip forward/backward buttons
+- Progress bar showing clip playback
+- Auto-advance to next song when clip ends (optional)
+- Volume control
+- Preload next audio clip for smooth transitions
+- Handle audio loading errors gracefully (skip to next song)
+
+ANSWER GRID:
+- Grid layout showing numbers 1-50 (adjust based on songCount)
+- Each cell shows:
+  * Song number (clickable to jump to that song)
+  * Input field (initially empty)
+  * Green background when correctly answered
+  * Show album art thumbnail when revealed/correct
+- Users can fill in ANY song number at ANY time (Sporcle-style)
+- Clicking a number in the grid jumps the audio player to that song
+- Auto-check answer on blur/enter key press
+- Allow multiple attempts per song
+- Show green immediately on correct answer
+- Fuzzy matching on user input with 0.8 (80%) similarity threshold:
+  * Accept partial matches (e.g., "semi charmed life" matches "Semi-Charmed Life")
+  * Ignore case, punctuation, and "the/a/an" articles
+  * Accept with/without special characters ("Its" matches "It's")
+  * Accept partial song titles if >80% similar (e.g., "teen spirit" matches "Smells Like Teen Spirit")
+  * Artist name alone should NOT match (must include song title keywords)
+  * Use fuse.js for instant client-side matching
+- Display correct answer on reveal or after quiz ends
+
+QUIZ CONTROLS:
+- "Give Up" button to reveal all answers
+- Timer (optional for now)
+- Score display (X/50 correct)
+
+STATE MANAGEMENT:
+- Use React Context or Zustand for global quiz state
+- Store quiz state in localStorage for page refresh persistence
+- State should include:
+  * Quiz ID
+  * Song list with metadata
+  * Current song index
+  * User answers (array)
+  * Correct answers revealed (boolean array)
+  * Quiz started timestamp
+  * Audio playback position
+  * Score
+
+3. LANDING PAGE
+---------------
+
+Simple form with:
+- Text input for music prompt (placeholder: "90s alternative rock, 2000s pop punk, 80s new wave")
+- Number input for song count (default: 50, range: 10-50)
+- "Generate Quiz" button with loading state
+- Loading state while API processes (show progress if possible)
+- Comprehensive error handling with user-friendly messages:
+  * Spotify API errors
+  * LLM timeouts - show retry button
+  * No preview URLs available - show count and continue with available songs
+  * Network errors
+- Display estimated generation time
+
+========================================
+PROJECT STRUCTURE
+========================================
+
+music-quiz-app/
+├── frontend/
+│   ├── app/
+│   │   ├── page.tsx              # Landing page
+│   │   ├── quiz/[id]/page.tsx    # Quiz interface
+│   │   ├── api/
+│   │   │   └── proxy/route.ts    # Proxy to Python backend if needed
+│   │   └── layout.tsx
+│   ├── components/
+│   │   ├── quiz/
+│   │   │   ├── AudioPlayer.tsx
+│   │   │   ├── AnswerGrid.tsx
+│   │   │   ├── QuizControls.tsx
+│   │   │   └── SongInput.tsx
+│   │   └── ui/                    # shadcn components
+│   ├── lib/
+│   │   ├── fuzzyMatch.ts
+│   │   ├── audioPlayer.ts
+│   │   └── quizStore.ts           # State management
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── backend/
+│   ├── api/
+│   │   └── generate-quiz.py       # Main FastAPI endpoint
+│   ├── services/
+│   │   ├── llm_service.py         # Song list generation
+│   │   ├── spotify_service.py     # Spotify API integration
+│   │   └── cache_service.py       # Simple caching
+│   ├── models/
+│   │   └── schemas.py             # Pydantic models
+│   └── requirements.txt
+│
+└── vercel.json                     # Vercel deployment config
+
+========================================
+VERCEL DEPLOYMENT CONFIGURATION
+========================================
+
+Create vercel.json in project root:
+
+{
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/.next",
+  "devCommand": "cd frontend && npm run dev",
+  "installCommand": "cd frontend && npm install && cd ../backend && pip install -r requirements.txt",
+  "functions": {
+    "api/**/*.py": {
+      "runtime": "python3.9",
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ]
+}
+
+========================================
+IMPLEMENTATION STEPS
+========================================
+
+STEP 1: Set up Next.js frontend
+- Initialize Next.js 14 with TypeScript and Tailwind CSS
+- Install shadcn/ui: npx shadcn-ui@latest init
+- Install fuse.js for fuzzy matching
+- Create landing page with form
+- Install audio player dependencies (build custom with HTML5 audio)
+- Set up state management (React Context or Zustand)
+- Configure localStorage persistence
+
+STEP 2: Build FastAPI backend
+- Create FastAPI app with CORS enabled for Vercel deployment
+- Set up Spotify API authentication (Client Credentials flow)
+- Implement LLM integration for song curation with structured JSON output
+- Implement song validation loop:
+  * Generate 70-80 initial songs
+  * Validate each has Spotify preview
+  * Continue generating until 50 valid songs found
+- Create parallel Spotify queries using asyncio.gather()
+- Implement retry with exponential backoff for 429 rate limit errors
+- Add request timeouts (2s per Spotify call)
+- Implement in-memory caching for common prompts
+- Add comprehensive error handling and logging
+
+STEP 3: Quiz UI Components
+- Build AudioPlayer component with play/pause/skip controls and preloading
+- Create AnswerGrid with numbered cells (clickable) and input fields
+- Implement fuzzy matching with fuse.js (0.8 similarity threshold)
+- Add visual feedback (green for correct, show album art)
+- Enable clicking song numbers to jump to that song
+- Connect components to quiz state management
+- Implement localStorage persistence
+
+STEP 4: Integration
+- Connect frontend form to backend API
+- Handle loading states and comprehensive error messages
+- Store quiz data in state management + localStorage
+- Implement answer checking logic with fuzzy matching
+- Add reveal/give-up functionality
+- Test audio playback and CORS issues
+
+STEP 5: Deployment prep
+- Configure vercel.json for both Next.js and Python functions
+- Set up environment variables (SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, OPENAI_API_KEY)
+- Test locally with vercel dev
+- Deploy to Vercel and test production build
+
+========================================
+IMPORTANT REQUIREMENTS
+========================================
+
+FUZZY MATCHING RULES (0.8 similarity threshold):
+- Ignore case, punctuation, and "the/a/an" articles
+- Accept partial matches if >80% similar
+- Artist name alone should NOT match (must include song title keywords)
+
+Examples:
+✅ "wonderwall" → "Wonderwall"
+✅ "smells like teen spirit" → "Smells Like Teen Spirit"  
+✅ "teen spirit" → "Smells Like Teen Spirit"
+✅ "semi charmed life" → "Semi-Charmed Life"
+❌ "wall" → "Wonderwall"
+❌ "oasis" → "Wonderwall"
+
+SONG GENERATION & VALIDATION:
+- Generate 70-80 songs initially (40% buffer)
+- Validate EACH song exists on Spotify with preview URL
+- Continue until exactly 50 valid songs are found
+- If initial batch insufficient, generate more songs automatically
+- Never return fewer than 50 songs (keep trying until 50 found)
+
+PERFORMANCE:
+- Ensure API responds within 10 seconds (Vercel Hobby timeout)
+- Use parallel requests with asyncio.gather()
+- Implement request timeouts (2s per Spotify call)
+- Cache common prompts for 24 hours
+
+UX REQUIREMENTS:
+- Show loading state during quiz generation with estimated time
+- Smooth audio transitions with preloading
+- Users can click any song number to jump to it
+- Users can fill in any answer at any time (Sporcle-style)
+- Immediate visual feedback on correct answers (green)
+- Mobile-friendly responsive grid
+- Quiz state persists on page refresh (localStorage)
+
+ERROR HANDLING:
+- Spotify API rate limiting (429) - retry with exponential backoff
+- LLM timeout - show retry button to user
+- Missing preview URLs - continue validation until 50 found
+- Audio loading errors - skip to next song gracefully
+- Network errors - user-friendly messages with retry option
+- Frontend: Show specific error messages with actionable retry buttons
+
+CORS & AUDIO PLAYBACK:
+- Test Spotify preview URL CORS in browser
+- If CORS blocked, create proxy endpoint in Next.js API routes
+- Preload next audio clip for smooth transitions
+- Handle audio loading errors gracefully (skip to next song)
+
+========================================
+ENVIRONMENT VARIABLES NEEDED
+========================================
+
+Create .env.local in frontend/:
+NEXT_PUBLIC_API_URL=http://localhost:3000
+
+Create .env in backend/ (and configure in Vercel):
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+OPENAI_API_KEY=your_openai_key
+# or
+ANTHROPIC_API_KEY=your_anthropic_key
+
+========================================
+NICE-TO-HAVES (if time permits)
+========================================
+
+- Display progress during quiz generation ("Generating songs... Validating previews... 30/50 found")
+- Allow jumping to specific song numbers via number input
+- Pause quiz and resume later with localStorage
+- Share quiz results (score screenshot or link)
+- Dark mode toggle
+- Keyboard shortcuts (spacebar = play/pause, arrows = skip)
+- Visual waveform for audio playback
+- Leaderboard (requires database - future enhancement)
+
+========================================
+GETTING STARTED INSTRUCTIONS
+========================================
+
+1. Create the initial project structure with both frontend/ and backend/ directories
+2. Set up Next.js 14 frontend with TypeScript, Tailwind CSS, and shadcn/ui
+3. Create landing page with genre prompt input form and loading states
+4. Build FastAPI backend with:
+   - Spotify authentication setup
+   - LLM integration for structured song generation
+   - Song validation loop (continue until 50 valid songs)
+   - Parallel Spotify API calls with retry logic
+   - In-memory caching
+5. Create quiz UI components:
+   - AudioPlayer with preloading and skip controls
+   - AnswerGrid with clickable numbers and fuzzy matching
+   - QuizControls with give-up and score display
+6. Implement state management with localStorage persistence
+7. Test end-to-end flow locally
+8. Configure vercel.json and deploy
+
+Build this incrementally, testing each component as we go. Follow best practices for code organization, add comprehensive comments, and ensure all error cases are handled gracefully.
+
+The goal is a working MVP that can generate quizzes quickly (<10s), validate all songs have previews, and provide a smooth Sporcle-like quiz experience where users can fill in any answer at any time by clicking song numbers to navigate.
