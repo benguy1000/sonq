@@ -5,7 +5,7 @@
   "installCommand": "cd frontend && npm install && cd ../backend && pip install -r requirements.txt",
   "functions": {
     "api/**/*.py": {
-      "runtime": "python3.9",
+      "runtime": "@vercel/python@4.5.0",
       "maxDuration": 60
     }
   },
