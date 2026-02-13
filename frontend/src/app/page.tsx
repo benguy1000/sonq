@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuizStore } from "@/lib/quizStore";
 import { Difficulty } from "@/lib/types";
-import { Music, Loader2, Sparkles, HelpCircle, X } from "lucide-react";
+import { Music, Loader2, Sparkles, HelpCircle, X, Share2 } from "lucide-react";
 
 const difficulties: { value: Difficulty; label: string; desc: string }[] = [
   { value: "easy", label: "Easy", desc: "Fuzzy matching, close enough counts" },
@@ -24,6 +24,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const hasExistingQuiz = quizId !== null;
   const blobRef = useRef<HTMLDivElement>(null);
@@ -305,7 +306,7 @@ export default function Home() {
               </li>
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold">2</span>
-                <span>Listen to the 30-second audio preview for each song</span>
+                <span>Listen to the 30 second audio preview for each song</span>
               </li>
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">3</span>
@@ -313,12 +314,28 @@ export default function Home() {
               </li>
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold">4</span>
-                <span>Click any tile to jump to that song — beat the clock!</span>
+                <span>Click any tile to jump to that song and beat the clock!</span>
               </li>
             </ol>
-            <p className="text-xs text-zinc-500">
-              Tip: Difficulty controls how strict the matching is. Easy accepts close guesses, Hard needs the exact title.
-            </p>
+            <div className="space-y-1">
+              <p className="text-xs text-zinc-500">
+                Difficulty controls how strict the matching is. Easy accepts close guesses, Hard needs the exact title.
+              </p>
+              <p className="text-xs text-zinc-500">
+                Try prompts like &quot;90s alternative rock&quot;, &quot;2000s pop punk&quot;, &quot;80s new wave&quot;, &quot;disco classics&quot;, or &quot;best of the Beatles&quot;.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.origin);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors text-sm"
+            >
+              <Share2 className="h-4 w-4" />
+              {copied ? "Link copied!" : "Share with friends"}
+            </button>
           </div>
         </div>
       )}
