@@ -33,6 +33,19 @@ export default function Home() {
     el.classList.remove("blob-poked");
     void el.offsetWidth;
     el.classList.add("blob-poked");
+    // Kick each blob to a random offset
+    const blobs = el.querySelectorAll<HTMLElement>("[data-blob]");
+    blobs.forEach((b) => {
+      const x = (Math.random() - 0.5) * 400;
+      const y = (Math.random() - 0.5) * 400;
+      const s = 1 + Math.random() * 0.6;
+      b.style.transition = "transform 0.4s cubic-bezier(0.22,1,0.36,1)";
+      b.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+      setTimeout(() => {
+        b.style.transition = "";
+        b.style.transform = "";
+      }, 500);
+    });
   }, []);
 
   const handleGenerate = async () => {
@@ -76,23 +89,23 @@ export default function Home() {
     <main className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden" onClick={pokeBlobs}>
       {/* Animated background blobs */}
       <div ref={blobRef} className="fixed inset-0 -z-10 overflow-hidden">
-        <div
+        <div data-blob
           className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-pink-500/30 blur-[100px]"
           style={{ animation: "blob1 10s ease-in-out infinite" }}
         />
-        <div
+        <div data-blob
           className="absolute bottom-[-15%] right-[-5%] w-[550px] h-[550px] rounded-full bg-orange-500/25 blur-[120px]"
           style={{ animation: "blob2 12s ease-in-out infinite" }}
         />
-        <div
+        <div data-blob
           className="absolute top-[30%] right-[10%] w-[400px] h-[400px] rounded-full bg-emerald-500/20 blur-[100px]"
           style={{ animation: "blob3 14s ease-in-out infinite" }}
         />
-        <div
+        <div data-blob
           className="absolute top-[60%] left-[15%] w-[350px] h-[350px] rounded-full bg-fuchsia-500/20 blur-[110px]"
           style={{ animation: "blob4 9s ease-in-out infinite" }}
         />
-        <div
+        <div data-blob
           className="absolute top-[10%] right-[30%] w-[300px] h-[300px] rounded-full bg-amber-400/20 blur-[90px]"
           style={{ animation: "blob5 11s ease-in-out infinite" }}
         />

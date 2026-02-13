@@ -112,9 +112,9 @@
   }
 
   @keyframes poke {
-    0% { filter: brightness(1); }
-    20% { filter: brightness(1.8); }
-    100% { filter: brightness(1); }
+    0% { filter: brightness(1) saturate(1); }
+    15% { filter: brightness(3) saturate(1.5); }
+    100% { filter: brightness(1) saturate(1); }
   }
 
   .blob-poked {
