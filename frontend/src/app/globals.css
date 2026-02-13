@@ -2,44 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
-@keyframes loading {
-  0% { transform: scaleX(0); transform-origin: left; }
-  50% { transform: scaleX(1); transform-origin: left; }
-  50.1% { transform: scaleX(1); transform-origin: right; }
-  100% { transform: scaleX(0); transform-origin: right; }
-}
-
 @layer base {
   :root {
-    --background: 0 0% 3.9%;
+    --background: 260 20% 4%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
+    --card: 260 15% 8%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
+    --popover: 260 15% 8%;
     --popover-foreground: 0 0% 98%;
-    --primary: 142.1 76.2% 36.3%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 12 6.5% 15.1%;
-    --accent-foreground: 0 0% 98%;
+    --primary: 330 85% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 160 70% 45%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 260 10% 14%;
+    --muted-foreground: 260 5% 55%;
+    --accent: 24 90% 55%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 142.4 71.8% 29.2%;
-    --radius: 0.5rem;
+    --border: 260 10% 16%;
+    --input: 260 10% 16%;
+    --ring: 330 85% 60%;
+    --radius: 0.75rem;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-geist-sans), system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  @keyframes loading {
+    0% { transform: scaleX(0); transform-origin: left; }
+    50% { transform: scaleX(1); transform-origin: left; }
+    50.1% { transform: scaleX(1); transform-origin: right; }
+    100% { transform: scaleX(0); transform-origin: right; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
   }
 }

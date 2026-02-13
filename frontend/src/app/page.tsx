@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuizStore } from "@/lib/quizStore";
 import { Difficulty } from "@/lib/types";
-import { Music, Loader2 } from "lucide-react";
+import { Music, Loader2, Sparkles } from "lucide-react";
 
 const difficulties: { value: Difficulty; label: string; desc: string }[] = [
   { value: "easy", label: "Easy", desc: "Fuzzy matching, close enough counts" },
@@ -64,15 +64,31 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8">
+    <main className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+      {/* Background gradient blobs */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-pink-500/15 blur-[120px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-orange-500/15 blur-[120px]" />
+        <div className="absolute top-[40%] right-[20%] w-[300px] h-[300px] rounded-full bg-emerald-500/10 blur-[100px]" />
+      </div>
+
       <div className="w-full max-w-lg space-y-8">
         {/* Logo/Title */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-2">
-            <Music className="h-8 w-8 text-primary" />
+          <div
+            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-3"
+            style={{
+              background: "linear-gradient(135deg, hsl(330 85% 60%), hsl(24 90% 55%))",
+              animation: "float 3s ease-in-out infinite",
+            }}
+          >
+            <Music className="h-10 w-10 text-white" />
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
-            Son<span className="text-primary">Q</span>
+          <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight">
+            Son
+            <span className="bg-gradient-to-r from-pink-500 via-orange-400 to-emerald-400 bg-clip-text text-transparent">
+              Q
+            </span>
           </h1>
           <p className="text-muted-foreground text-lg">
             AI Song Quiz Creator
@@ -81,20 +97,30 @@ export default function Home() {
 
         {/* Form or Loading */}
         {loading ? (
-          <div className="bg-zinc-900/50 rounded-2xl p-10 border border-zinc-800 flex flex-col items-center gap-5">
-            <Loader2 className="h-10 w-10 text-primary animate-spin" />
+          <div className="rounded-2xl p-10 border border-white/10 backdrop-blur-sm flex flex-col items-center gap-5"
+            style={{ background: "linear-gradient(135deg, rgba(236,72,153,0.08), rgba(251,146,60,0.08))" }}
+          >
+            <Loader2 className="h-10 w-10 text-pink-400 animate-spin" />
             <div className="text-center space-y-2">
               <p className="text-white text-lg font-medium">Generating quiz...</p>
-              <p className="text-zinc-500 text-sm">
-                This could take 10–20 seconds
+              <p className="text-zinc-400 text-sm">
+                This could take 10-20 seconds
               </p>
             </div>
-            <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
-              <div className="h-full bg-primary rounded-full w-full" style={{ animation: 'loading 2s ease-in-out infinite' }} />
+            <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+              <div
+                className="h-full rounded-full w-full"
+                style={{
+                  background: "linear-gradient(90deg, hsl(330 85% 60%), hsl(24 90% 55%), hsl(160 70% 45%))",
+                  animation: "loading 2s ease-in-out infinite",
+                }}
+              />
             </div>
           </div>
         ) : (
-          <div className="space-y-4 bg-zinc-900/50 rounded-2xl p-6 border border-zinc-800">
+          <div className="space-y-5 rounded-2xl p-6 border border-white/10 backdrop-blur-sm"
+            style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))" }}
+          >
             <div>
               <label className="text-sm font-medium text-zinc-300 mb-2 block">
                 Music Genre / Era
@@ -103,7 +129,7 @@ export default function Home() {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="90s alternative rock, 2000s pop punk, 80s new wave..."
-                className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 h-12 text-base"
+                className="bg-white/5 border-white/10 text-white placeholder:text-zinc-500 h-12 text-base focus:border-pink-500/50 focus:ring-pink-500/20"
                 onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
               />
             </div>
@@ -125,9 +151,9 @@ export default function Home() {
                     const n = parseInt(songCount);
                     setSongCount(String(isNaN(n) ? 10 : Math.min(50, Math.max(10, n))));
                   }}
-                  className="bg-zinc-800 border-zinc-700 text-white w-24 h-12 text-base text-center"
+                  className="bg-white/5 border-white/10 text-white w-24 h-12 text-base text-center focus:border-pink-500/50 focus:ring-pink-500/20"
                 />
-                <span className="text-zinc-500 text-sm">songs (10–50)</span>
+                <span className="text-zinc-500 text-sm">songs (10-50)</span>
               </div>
             </div>
 
@@ -140,14 +166,14 @@ export default function Home() {
                   <button
                     key={d.value}
                     onClick={() => setDifficulty(d.value)}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all border ${
+                    className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all border ${
                       difficulty === d.value
                         ? d.value === "easy"
-                          ? "bg-green-500/20 border-green-500 text-green-400"
+                          ? "bg-emerald-500/20 border-emerald-400/50 text-emerald-400 shadow-lg shadow-emerald-500/10"
                           : d.value === "medium"
-                          ? "bg-yellow-500/20 border-yellow-500 text-yellow-400"
-                          : "bg-red-500/20 border-red-500 text-red-400"
-                        : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-500"
+                          ? "bg-orange-500/20 border-orange-400/50 text-orange-400 shadow-lg shadow-orange-500/10"
+                          : "bg-pink-500/20 border-pink-400/50 text-pink-400 shadow-lg shadow-pink-500/10"
+                        : "bg-white/5 border-white/10 text-zinc-400 hover:border-white/20 hover:text-zinc-300"
                     }`}
                   >
                     {d.label}
@@ -162,9 +188,15 @@ export default function Home() {
             <Button
               onClick={handleGenerate}
               disabled={!prompt.trim()}
-              className="w-full h-12 text-base font-semibold"
+              className="w-full h-12 text-base font-semibold text-white border-0 disabled:opacity-40"
+              style={{
+                background: prompt.trim()
+                  ? "linear-gradient(135deg, hsl(330 85% 55%), hsl(24 90% 50%))"
+                  : undefined,
+              }}
               size="lg"
             >
+              <Sparkles className="mr-2 h-5 w-5" />
               Generate Quiz
             </Button>
           </div>
@@ -191,7 +223,7 @@ export default function Home() {
             <Button
               variant="outline"
               onClick={handleResume}
-              className="border-zinc-700 text-zinc-300"
+              className="border-white/10 text-zinc-300 hover:border-white/20 hover:text-white"
             >
               Resume Previous Quiz
             </Button>
