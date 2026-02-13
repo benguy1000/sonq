@@ -15,7 +15,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "SonQ - AI Song Quiz Creator",
-  description: "AI-powered song quiz creator with Spotify previews",
+  description: "AI-powered song quiz creator with audio previews",
 };
 
 export default function RootLayout({

@@ -113,7 +113,7 @@ export default function SongInput({ index }: SongInputProps) {
             onKeyDown={handleKeyDown}
             onClick={(e) => e.stopPropagation()}
             placeholder="..."
-            className="w-full bg-transparent border-none outline-none text-sm text-white placeholder-zinc-600 p-0"
+            className="w-full bg-transparent border-none outline-none text-sm text-white placeholder-zinc-400 p-0"
             autoComplete="off"
             spellCheck={false}
           />

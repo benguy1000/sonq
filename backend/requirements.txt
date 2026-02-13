@@ -1,9 +1,0 @@
-fastapi
-spotipy
-openai
-anthropic
-rapidfuzz
-uvicorn
-httpx
-python-dotenv
-mangum

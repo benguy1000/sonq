@@ -169,7 +169,7 @@ export default function Home() {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="90s alternative rock, 2000s pop punk, 80s new wave..."
-                className="bg-white/5 border-white/10 text-white placeholder:text-zinc-500 h-12 text-base focus:border-pink-500/50 focus:ring-pink-500/20"
+                className="bg-white/5 border-white/10 text-white placeholder:text-zinc-400 h-12 text-base focus:border-pink-500/50 focus:ring-pink-500/20"
                 onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
               />
             </div>
