@@ -3,8 +3,9 @@ import { Difficulty } from "./types";
 
 // Keywords that indicate metadata parentheticals (not part of the real title)
 const METADATA_KEYWORDS = [
-  // Remaster / re-record
+  // Remaster / re-record (with optional year prefix)
   "remaster(ed)?", "re-?master(ed)?", "re-?record(ed)?",
+  "\\d{4}\\s+remaster(ed)?", "\\d{4}\\s+re-?record(ed)?",
   // Editions
   "deluxe(\\s+edition)?", "special\\s+edition", "expanded\\s+edition",
   "anniversary(\\s+edition)?", "collector'?s?\\s+edition", "limited\\s+edition",
@@ -75,7 +76,7 @@ export function checkAnswer(
   if (difficulty === "hard") return false;
 
   // Require input to be a substantial portion of the title before fuzzy matching
-  const minLenRatio = difficulty === "easy" ? 0.6 : 0.8;
+  const minLenRatio = difficulty === "easy" ? 0.75 : 0.9;
   if (input.length < title.length * minLenRatio) return false;
 
   // Easy mode: more forgiving thresholds
