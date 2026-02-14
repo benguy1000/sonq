@@ -74,6 +74,10 @@ export function checkAnswer(
   // Hard mode: exact match only (after normalization)
   if (difficulty === "hard") return false;
 
+  // Require input to be a substantial portion of the title before fuzzy matching
+  const minLenRatio = difficulty === "easy" ? 0.6 : 0.8;
+  if (input.length < title.length * minLenRatio) return false;
+
   // Easy mode: more forgiving thresholds
   // Medium mode: tighter thresholds
 
