@@ -24,7 +24,7 @@ function randomPrompt(): string {
 const difficulties: { value: Difficulty; label: string; desc: string }[] = [
   { value: "easy", label: "Easy", desc: "Fuzzy matching + mostly well-known hits" },
   { value: "medium", label: "Medium", desc: "Minor typos allowed + balanced song mix" },
-  { value: "hard", label: "Hard", desc: "Exact title + more deep cuts and B-sides" },
+  { value: "hard", label: "Hard", desc: "Exact title + more deep cuts" },
 ];
 
 export default function Home() {
@@ -139,18 +139,18 @@ export default function Home() {
           >
             <Music className="h-14 w-14 text-white" />
           </div>
-          <h1 className="text-6xl sm:text-8xl font-extrabold tracking-tight">
+          <h1 className="text-7xl sm:text-9xl font-extrabold tracking-tight">
             Son
             <span className="bg-gradient-to-r from-pink-500 via-orange-400 to-emerald-400 bg-clip-text text-transparent">
               Q
             </span>
           </h1>
           <p className="text-muted-foreground text-xl sm:text-2xl">
-            AI Song Quiz Creator
+            The AI Song Quiz Creator
           </p>
           <button
             onClick={() => setShowHelp(true)}
-            className="inline-flex items-center gap-1.5 text-zinc-500 hover:text-zinc-300 text-sm transition-colors mt-1"
+            className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-zinc-200 text-sm transition-colors mt-1"
           >
             <HelpCircle className="h-4 w-4" />
             How to Play
@@ -165,7 +165,7 @@ export default function Home() {
             <Loader2 className="h-10 w-10 text-pink-400 animate-spin" />
             <div className="text-center space-y-2">
               <p className="text-white text-lg font-medium">Generating quiz...</p>
-              <p className="text-zinc-400 text-sm">
+              <p className="text-zinc-300 text-sm">
                 This could take 10-20 seconds
               </p>
             </div>
@@ -191,7 +191,7 @@ export default function Home() {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="90s alternative rock, 2000s pop punk, 80s new wave..."
-                className="bg-white/5 border-white/10 text-white placeholder:text-zinc-400 h-12 text-base focus:border-pink-500/50 focus:ring-pink-500/20"
+                className="bg-white/5 border-white/10 text-white placeholder:text-zinc-500 h-12 text-base focus:border-pink-500/50 focus:ring-pink-500/20"
                 onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
               />
             </div>
@@ -215,7 +215,7 @@ export default function Home() {
                   }}
                   className="bg-white/5 border-white/10 text-white w-24 h-12 text-base text-center focus:border-pink-500/50 focus:ring-pink-500/20"
                 />
-                <span className="text-zinc-500 text-sm">songs (10-50)</span>
+                <span className="text-zinc-400 text-sm">songs (10-50)</span>
               </div>
             </div>
 
@@ -242,7 +242,7 @@ export default function Home() {
                   </button>
                 ))}
               </div>
-              <p className="text-zinc-500 text-xs mt-1.5">
+              <p className="text-zinc-400 text-xs mt-1.5">
                 {difficulties.find((d) => d.value === difficulty)?.desc}
               </p>
             </div>
@@ -292,7 +292,7 @@ export default function Home() {
                       setLoading(false);
                     });
                 }}
-                className="w-full h-10 rounded-xl text-sm font-semibold border border-white/10 text-zinc-400 hover:text-white hover:border-white/20 transition-colors flex items-center justify-center gap-2"
+                className="w-full h-10 rounded-xl text-sm font-semibold border border-white/10 text-zinc-300 hover:text-white hover:border-white/20 transition-colors flex items-center justify-center gap-2"
               >
                 <Shuffle className="h-4 w-4" />
                 I&apos;m Feeling Lucky
@@ -330,9 +330,9 @@ export default function Home() {
         )}
       </div>
 
-      <p className="absolute bottom-4 text-zinc-600 text-xs">
+      <p className="absolute bottom-4 text-zinc-500 text-xs">
         Built by{" "}
-        <a href="https://github.com/benguy1000" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-zinc-300 transition-colors">Ben</a>
+        <a href="https://github.com/benguy1000" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-200 transition-colors">Ben</a>
       </p>
 
       {/* How to Play modal */}
@@ -343,9 +343,9 @@ export default function Home() {
             className="relative bg-zinc-900 border border-zinc-700 rounded-2xl p-6 max-w-sm w-full space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-white">How to Play</h2>
-              <button onClick={() => setShowHelp(false)} className="text-zinc-500 hover:text-white transition-colors">
+            <div className="flex items-center justify-between relative">
+              <h2 className="text-lg font-bold text-white w-full text-center">How to Play</h2>
+              <button onClick={() => setShowHelp(false)} className="absolute right-0 text-zinc-400 hover:text-white transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -353,20 +353,35 @@ export default function Home() {
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center text-xs font-bold">1</span>
                 <div>
-                  <span>Enter a prompt for what genre and era of songs you would like in your quiz, example: &quot;90s alternative rock&quot;, &quot;2000s pop punk&quot;, &quot;80s new wave&quot;</span>
-                  <p className="text-xs text-zinc-500 mt-1">Difficulty affects both answer matching and song selection. Easy = more hits with forgiving matching. Hard = more deep cuts with exact titles required.</p>
+                  <span>Enter a prompt for what genre and era of songs you&apos;d like</span>
+                  <ul className="text-xs text-zinc-400 mt-1 space-y-0.5">
+                    <li>&bull; &quot;90s alternative rock&quot;</li>
+                    <li>&bull; &quot;2000s pop punk&quot;</li>
+                    <li>&bull; &quot;80s new wave&quot;</li>
+                  </ul>
                 </div>
               </li>
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-xs font-bold">2</span>
-                <span>Listen to the 30 second audio preview for each song</span>
+                <div>
+                  <span>Select difficulty</span>
+                  <ul className="text-xs text-zinc-400 mt-1 space-y-1">
+                    <li>&bull; Easy: mostly hits, &quot;eye of the tigr&quot; &#x2192; &#x2705;</li>
+                    <li>&bull; Medium: balanced mix, &quot;eye of the tiger&quot; &#x2192; &#x2705;</li>
+                    <li>&bull; Hard: more deep cuts, &quot;Eye of the Tiger&quot; exact &#x2192; &#x2705;</li>
+                  </ul>
+                </div>
               </li>
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">3</span>
-                <span>Type the song title and press Enter to check your answer</span>
+                <span>Listen to the 30 second audio preview for each song</span>
               </li>
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs font-bold">4</span>
+                <span>Type the song title and press Enter to check your answer</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-xs font-bold">5</span>
                 <span>Click any tile to jump to that song and beat the clock!</span>
               </li>
             </ol>
@@ -376,7 +391,7 @@ export default function Home() {
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
               }}
-              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors text-sm"
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-500 transition-colors text-sm"
             >
               <Share2 className="h-4 w-4" />
               {copied ? "Link copied!" : "Share with friends"}

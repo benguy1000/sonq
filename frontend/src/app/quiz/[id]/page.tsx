@@ -23,7 +23,7 @@ export default function QuizPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
-          <Music className="h-12 w-12 text-zinc-500 mx-auto" />
+          <Music className="h-12 w-12 text-zinc-400 mx-auto" />
           <p className="text-zinc-400">Loading quiz...</p>
         </div>
       </div>
@@ -52,7 +52,7 @@ export default function QuizPage() {
             <h1 className="text-lg sm:text-xl font-bold text-white">
               Son<span className="text-primary">Q</span>
             </h1>
-            <p className="text-zinc-500 text-sm truncate max-w-xs sm:max-w-md">
+            <p className="text-zinc-400 text-sm truncate max-w-xs sm:max-w-md">
               {prompt}
             </p>
           </div>
@@ -87,13 +87,13 @@ export default function QuizPage() {
       <AnswerGrid />
 
       {/* Keyboard shortcuts hint */}
-      <div className="text-center text-xs text-zinc-600 pb-1">
+      <div className="text-center text-xs text-zinc-500 pb-1">
         Click any tile to jump to that song. Type your answer and press Enter.
       </div>
 
-      <p className="text-center text-zinc-600 text-xs pb-4">
+      <p className="text-center text-zinc-500 text-xs pb-4">
         Built by{" "}
-        <a href="https://github.com/benguy1000" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-zinc-300 transition-colors">Ben</a>
+        <a href="https://github.com/benguy1000" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-300 transition-colors">Ben</a>
       </p>
     </main>
   );

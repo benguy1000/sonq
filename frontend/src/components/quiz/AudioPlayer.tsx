@@ -151,7 +151,7 @@ export default function AudioPlayer() {
             className="w-14 h-14 rounded-md object-cover"
           />
         ) : (
-          <div className="w-14 h-14 rounded-md bg-zinc-800 flex items-center justify-center text-zinc-500 text-lg font-bold">
+          <div className="w-14 h-14 rounded-md bg-zinc-800 flex items-center justify-center text-zinc-400 text-lg font-bold">
             ?
           </div>
         )}
@@ -169,7 +169,7 @@ export default function AudioPlayer() {
               </div>
             </>
           ) : (
-            <div className="text-zinc-500 italic">Guess the song!</div>
+            <div className="text-zinc-400 italic">Guess the song!</div>
           )}
         </div>
       </div>
@@ -253,7 +253,7 @@ export default function AudioPlayer() {
       </div>
 
       {/* Time display */}
-      <div className="flex justify-between text-xs text-zinc-500 mt-1">
+      <div className="flex justify-between text-xs text-zinc-400 mt-1">
         <span>{formatTime(progress)}</span>
         <span>{formatTime(duration || 30)}</span>
       </div>

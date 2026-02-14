@@ -46,9 +46,9 @@ export default function QuizControls() {
       <div className="text-center">
         <div className="text-3xl font-bold text-white">
           {score}
-          <span className="text-zinc-500 text-lg">/{songs.length}</span>
+          <span className="text-zinc-400 text-lg">/{songs.length}</span>
         </div>
-        <div className="text-xs text-zinc-500 uppercase tracking-wider">
+        <div className="text-xs text-zinc-400 uppercase tracking-wider">
           Score
         </div>
       </div>
@@ -59,7 +59,7 @@ export default function QuizControls() {
           <Clock className="inline h-4 w-4 mr-1 mb-0.5" />
           {revealed ? formatTime(totalSeconds - remaining) : formatTime(remaining)}
         </div>
-        <div className="text-xs text-zinc-500 uppercase tracking-wider">
+        <div className="text-xs text-zinc-400 uppercase tracking-wider">
           {revealed ? "Final Time" : "Remaining"}
         </div>
       </div>
