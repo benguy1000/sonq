@@ -6,10 +6,11 @@ import { useQuizStore } from "@/lib/quizStore";
 import { Flag, RotateCcw, Clock } from "lucide-react";
 
 export default function QuizControls() {
-  const { songs, score, revealed, startedAt, revealAll, resetQuiz } =
+  const { songs, score, revealed, startedAt, difficulty, revealAll, resetQuiz } =
     useQuizStore();
 
-  const totalSeconds = songs.length * 20;
+  const secsPerSong = difficulty === "easy" ? 30 : difficulty === "hard" ? 10 : 15;
+  const totalSeconds = songs.length * secsPerSong;
   const [remaining, setRemaining] = useState(totalSeconds);
 
   const handleTimeUp = useCallback(() => {
