@@ -1,11 +1,49 @@
 import Fuse from "fuse.js";
 import { Difficulty } from "./types";
 
+// Keywords that indicate metadata parentheticals (not part of the real title)
+const METADATA_KEYWORDS = [
+  // Remaster / re-record
+  "remaster(ed)?", "re-?master(ed)?", "re-?record(ed)?",
+  // Editions
+  "deluxe(\\s+edition)?", "special\\s+edition", "expanded\\s+edition",
+  "anniversary(\\s+edition)?", "collector'?s?\\s+edition", "limited\\s+edition",
+  // Versions
+  "album\\s+version", "single\\s+(version|edit)", "radio\\s+(edit|version|mix)",
+  "extended\\s+(version|mix)", "original\\s+mix", "club\\s+(mix|edit)", "dub\\s+mix",
+  // Performance
+  "live(\\s+at\\s+[^)]*)?", "unplugged", "mtv\\s+unplugged", "acoustic(\\s+version)?",
+  "stripped", "demo(\\s+version)?",
+  // Audio variations
+  "instrumental", "a\\s+cappella", "karaoke(\\s+version)?", "mono", "stereo",
+  // Modern variants
+  "sped\\s+up", "slowed(\\s*\\+\\s*reverb)?", "nightcore", "8d\\s+audio", "bass\\s+boosted",
+  // Featuring (in parens)
+  "feat\\.?\\s+[^)]+", "ft\\.?\\s+[^)]+", "featuring\\s+[^)]+", "with\\s+[^)]+",
+  // Remix
+  "remix", "[^)]*\\s+remix", "vip\\s+mix", "bootleg", "mashup",
+  // Soundtrack / misc
+  "from\\s+[\"'][^)]*", "soundtrack(\\s+version)?", "film\\s+version",
+  "bonus\\s+track", "commentary",
+  // Content tags
+  "explicit", "clean(\\s+version)?",
+].join("|");
+
+const PAREN_RE = new RegExp(`\\s*\\((${METADATA_KEYWORDS})\\)`, "gi");
+const BRACKET_RE = new RegExp(`\\s*\\[(${METADATA_KEYWORDS})\\]`, "gi");
+const DASH_KEYWORDS = [
+  "remaster(ed)?", "re-?master(ed)?", "re-?record(ed)?",
+  "live", "mono", "stereo", "bonus\\s+track", "deluxe",
+  "anniversary", "edition", "acoustic", "demo", "remix",
+  "\\d{4}\\s+remaster(ed)?",
+].join("|");
+const DASH_RE = new RegExp(`\\s*[-–—]\\s*(${DASH_KEYWORDS}).*$`, "i");
+
 export function stripSuffix(text: string): string {
-  // Remove " - Remastered 2011", " (Remastered)", " - Live", " (Deluxe Edition)", etc.
   return text
-    .replace(/\s*[-–]\s*(remaster(ed)?|re-?master(ed)?|live|mono|stereo|bonus track|deluxe|anniversary|edition).*$/i, "")
-    .replace(/\s*\((remaster(ed)?|re-?master(ed)?|live|mono|stereo|bonus track|deluxe|anniversary|edition|single version|album version|radio edit|feat\.?[^)]*)\).*$/i, "")
+    .replace(PAREN_RE, "")
+    .replace(BRACKET_RE, "")
+    .replace(DASH_RE, "")
     .trim();
 }
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { stripSuffix } from "@/lib/fuzzyMatch";
 
 // Allow up to 60s on Vercel (default is 10s)
 export const maxDuration = 60;
@@ -41,7 +42,7 @@ async function searchDeezer(
     if (!hit || !hit.preview) return null;
 
     return {
-      title: hit.title,
+      title: stripSuffix(hit.title),
       artist: hit.artist?.name || "",
       album_art: hit.album?.cover_big || hit.album?.cover_medium || "",
       preview_url: hit.preview,
