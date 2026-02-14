@@ -88,7 +88,7 @@ export default function QuizPage() {
 
       {/* Keyboard shortcuts hint */}
       <div className="text-center text-xs text-zinc-500 pb-1">
-        Click any tile to jump to that song. Type your answer and press Enter.
+        Click any tile to jump to that song. Answers auto-submit when close enough. Press Enter to skip.
       </div>
 
       <p className="text-center text-zinc-500 text-xs pb-4">

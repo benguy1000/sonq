@@ -37,26 +37,32 @@ export default function SongInput({ index }: SongInputProps) {
     setTimeout(() => inputRef.current?.focus(), 50);
   };
 
+  const advanceToNext = () => {
+    const next = correctAnswers.findIndex((c, i) => i > index && !c);
+    if (next !== -1) {
+      setCurrentSong(next);
+      setPlaying(true);
+      setTimeout(() => {
+        const el = document.getElementById(`song-input-${next}`);
+        if (el) (el as HTMLInputElement).focus();
+      }, 50);
+    }
+  };
+
   const handleChange = (value: string) => {
     setUserAnswer(index, value);
+    if (!isCorrect && value.length >= 2) {
+      const matched = checkAnswer(value, song.title, song.artist, difficulty);
+      if (matched) {
+        markCorrect(index);
+        setTimeout(advanceToNext, 150);
+      }
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      if (!isCorrect && answer.length >= 2) {
-        const matched = checkAnswer(answer, song.title, song.artist, difficulty);
-        if (matched) markCorrect(index);
-      }
-      // Move to next unanswered and focus its input
-      const next = correctAnswers.findIndex((c, i) => i > index && !c);
-      if (next !== -1) {
-        setCurrentSong(next);
-        setPlaying(true);
-        setTimeout(() => {
-          const el = document.getElementById(`song-input-${next}`);
-          if (el) (el as HTMLInputElement).focus();
-        }, 50);
-      }
+      advanceToNext();
     }
   };
 
